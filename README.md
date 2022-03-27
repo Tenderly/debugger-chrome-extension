@@ -1,1 +1,1 @@
-# debugger-chrome-extention
+# One click debugger chrome extension

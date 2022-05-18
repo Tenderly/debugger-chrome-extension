@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "OneClickDebuggerV0",
+  "name": "OneClickDebugger",
   "description": "One click debugger for smart contract transactions",
   "version": "0.0.1",
   "icons": {
-    "16": "/images/bug_16.png",
-    "48": "/images/bug_48.png",
-    "128": "/images/bug_128.png"
+    "16": "/images/tdly_16.png",
+    "48": "/images/tdly_48.png",
+    "128": "/images/tdly_128.png"
   },
   "background": {
     "service_worker": "background.js"

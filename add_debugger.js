@@ -1,5 +1,9 @@
 if (typeof initDebugger === 'undefined') {
     const initDebugger = function () {
+        if (localStorage.getItem("tenderly/one-click-debugger") === "disabled") {
+            return
+        }
+
         const tenderlyRegex = new RegExp('dashboard.tenderly.co/tx')
         if (document.body.innerHTML.match(tenderlyRegex)) {
             return

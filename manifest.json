@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Debugger",
-  "description": "Tenderly Debugger extension, allowing you to instantly jump into the most versatile visual debugger from any transaction hash, anywhere on the web.",
+  "description": "Instantly jump into the most versatile (visual) debugger from any transaction hash, anywhere on the web.",
   "version": "0.0.1",
   "icons": {
     "16": "/images/tdly_16.png",

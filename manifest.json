@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Debugger",
+  "name": "Tenderly Debugger",
   "description": "Instantly jump into the most versatile (visual) debugger from any transaction hash, anywhere on the web.",
   "version": "0.0.1",
   "icons": {

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Tenderly Debugger",
   "description": "Instantly jump into the most versatile (visual) debugger from any transaction hash, from any of the block explorers.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "icons": {
     "16": "/images/tdly_16.png",
     "48": "/images/tdly_48.png",

@@ -62,6 +62,7 @@
                 promiseArray.push(fetch('https://core.poanetwork.dev', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 promiseArray.push(fetch('https://sokol.poa.network', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 
+                // Need to check if all statuses are OK because Blast API has a limit of 60 calls per minute each chain
                 let allStatusesAreok = true;
                 let existsOnBlockchain = false;
 

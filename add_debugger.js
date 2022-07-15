@@ -73,32 +73,33 @@
             data = await Promise.all(await response.map(res => res.json())).then(data => data);
         });
 
+        // console.log(data); // debug
+
         let candidateExistArray = [];
         for(let i = 0; i < nodeList.length; i++) {
-            // for every candidate we want to go through 23 entries in the data array
-            // if every entry in the data array is null, then the candidate does not exist and we'll remove the view in tenderly button
-            // if the candidate exists, we'll add it to the candidateExistArray
-            // console.log("checking candidate " + nodeList[i].innerHTML.substring(0, 66) );
-            // we'll check if nodeList[i].innerHTML.substring(0,66) is in the candidateExistArray
+            // skip if the candidate is already in the candidateExistArray
             if(candidateExistArray.includes(nodeList[i].innerHTML.substring(0,66))) {
-                // console.log("already exists");
                 continue;
             }
+            // otherwise, check the api responses for the candidate
             else{
                 let candidateExist = false;
+                // for every candidate we want to go through 23 entries in the data array
+                // if every entry in the data array is null, then the candidate does not exist and we'll remove the view in tenderly button
                 for(let j = 0; j < 23; j++) {
-                    if(data[i*23+j].result != null) {
+                    if((data[i*23+j].hasOwnProperty('result') && data[i*23+j].result != null) || data[i*23+j].hasOwnProperty('error')) {
                         candidateExist = true;
-                        break; // we'll break out of the for loop if we find a non-null result
+                        // we'll break out of the for loop if we find a non-null result
+                        break;
                     }
                 }
+                
                 if(candidateExist) {
-                    // add the candidate to the candidateExistArray so we can skip it in the future
+                    // if the candidate exists, we'll add it to the candidateExistArray so we can skip it in the future
                     candidateExistArray.push(textList[i]);
-                } else
-                {
-                    // remove the "view in tenderly" button
-                    nodeList[i].innerHTML = nodeList[i].innerHTML.replace(/<a href="https:\/\/dashboard.tenderly.co\/tx\/(.*?)\/one-click-debugger">View in Tenderly!<\/a>/, '');
+                } 
+                else {
+                    nodeList[i].innerHTML = nodeList[i].innerHTML.replace(/<a href="https:\/\/dashboard.tenderly.co\/tx\/(.*?)\/one-click-debugger">View in Tenderly!<\/a>/, ''); // remove the "view in tenderly" button
                 }
             }
         }

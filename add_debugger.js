@@ -12,20 +12,17 @@
         const regex = new RegExp('0x([a-fA-F0-9]{64})')
         const htmlElementRegex = new RegExp('(?:</[^<]+>)|(?:<[^<]+/>)')
 
-
-
         const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
+        let nodeList = [];
         let textList = []
+        let promiseArray = [];
         for (let i = 0; i < text.length; i++) {
-            let promiseArray = [];
-            
             // first test the text with the html element regex
             // search for the regex in the text
             // count the number of 0's in the string, if it's greater than 51 then it's likely not a valid transaction hash 
             // exclude candidates that have already been processed
             if (!htmlElementRegex.test(text[i].innerHTML) && text[i].innerHTML.search(regex) === 0 && text[i].innerHTML.length === 66 && text[i].innerHTML.match(/0/g).length < 51 && !textList.includes(text[i].innerHTML)) {
-                textList.push(text[i].innerHTML);
-                // console.log("hash candidate found! " + text[i].innerHTML)
+                console.log("candidate found:", text[i].innerHTML)
                 // call the RPC to see if the data is a real transaction
                 //ethereum and testnets
                 promiseArray.push(fetch('https://cloudflare-eth.com/', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
@@ -62,36 +59,51 @@
                 promiseArray.push(fetch('https://core.poanetwork.dev', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 promiseArray.push(fetch('https://sokol.poa.network', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 
-                // Need to check if all statuses are OK because Blast API has a limit of 60 calls per minute each chain
-                let allStatusesAreok = true;
-                let existsOnBlockchain = false;
+                
+                nodeList.push(text[i]);                                                                                                                                 // store the node in an array for quicker access later so we don't need to check every "text" node
+                textList.push(text[i].innerHTML);                                                                                                                       // add the hash itself to the list to skip later API calls on repeat hashes
+                text[i].innerHTML = text[i].innerHTML.replace(regex, '0x$1 <a href="https://dashboard.tenderly.co/tx/0x$1/one-click-debugger">View in Tenderly!</a>')   // by default we'll add the view in tenderly button to every candidate
+                
+            }
+        } // end for loop
 
-                await Promise.all(promiseArray).then(async function(response) {
-                    let data = await Promise.all(await response.map(res => res.json())).then(data => data);
-                    // console.log(data);
-                    for (var i = 0; i < response.length; i++) {
-                        if (response[i].status !== 200) {
-                            allStatusesAreok = false;
-                        }
-                        if( data[i].result != null ) {
-                            existsOnBlockchain = true;
-                        }
+        // process the API responses
+        let data;
+        await Promise.all(promiseArray).then(async function(response) {
+            data = await Promise.all(await response.map(res => res.json())).then(data => data);
+        });
 
+        let candidateExistArray = [];
+        for(let i = 0; i < nodeList.length; i++) {
+            // for every candidate we want to go through 23 entries in the data array
+            // if every entry in the data array is null, then the candidate does not exist and we'll remove the view in tenderly button
+            // if the candidate exists, we'll add it to the candidateExistArray
+            // console.log("checking candidate " + nodeList[i].innerHTML.substring(0, 66) );
+            // we'll check if nodeList[i].innerHTML.substring(0,66) is in the candidateExistArray
+            if(candidateExistArray.includes(nodeList[i].innerHTML.substring(0,66))) {
+                // console.log("already exists");
+                continue;
+            }
+            else{
+                let candidateExist = false;
+                for(let j = 0; j < 23; j++) {
+                    if(data[i*23+j].result != null) {
+                        candidateExist = true;
+                        break; // we'll break out of the for loop if we find a non-null result
                     }
-                });
-                // console.log("all statuses ok?", allStatusesAreok);
-                // console.log("exists on blockchain?", existsOnBlockchain);
-
-                if (allStatusesAreok && existsOnBlockchain) {
-                    text[i].innerHTML = text[i].innerHTML.replace(regex, '0x$1 <a href="https://dashboard.tenderly.co/tx/0x$1/one-click-debugger">View in Tenderly!</a>')
-                } else if (!allStatusesAreok)
+                }
+                if(candidateExist) {
+                    // add the candidate to the candidateExistArray so we can skip it in the future
+                    candidateExistArray.push(textList[i]);
+                } else
                 {
-                    text[i].innerHTML = text[i].innerHTML.replace(regex, '0x$1 <a href="https://dashboard.tenderly.co/tx/0x$1/one-click-debugger">View in Tenderly!</a>')
-                } 
-                // else { there's probably not any transaction with this hash on a supported blockchain }
+                    // remove the "view in tenderly" button
+                    nodeList[i].innerHTML = nodeList[i].innerHTML.replace(/<a href="https:\/\/dashboard.tenderly.co\/tx\/(.*?)\/one-click-debugger">View in Tenderly!<\/a>/, '');
+                }
             }
         }
     }
 
     initDebugger()
 }
+

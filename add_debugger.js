@@ -9,7 +9,7 @@
         injectElement.className = 'debuggerTest'
         injectElement.innerHTML = 'View in Tenderly'
 
-        const regex = new RegExp('0x([a-fA-F0-9]{64})')
+        const regex = new RegExp('^0x([a-fA-F0-9]{64})$')
         const htmlElementRegex = new RegExp('(?:</[^<]+>)|(?:<[^<]+/>)')
 
         const text = document.querySelectorAll('h1, h2, h3, h4, h5, p, li, td, caption, span, a')
@@ -59,10 +59,12 @@
                 promiseArray.push(fetch('https://core.poanetwork.dev', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 promiseArray.push(fetch('https://sokol.poa.network', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({jsonrpc: '2.0',method: 'eth_getTransactionReceipt',params: [text[i].innerHTML],id: 1})}));
                 
-                
-                nodeList.push(text[i]);                                                                                                                                 // store the node in an array for quicker access later so we don't need to check every "text" node
-                textList.push(text[i].innerHTML);                                                                                                                       // add the hash itself to the list to skip later API calls on repeat hashes
-                text[i].innerHTML = text[i].innerHTML.replace(regex, '0x$1 <a href="https://dashboard.tenderly.co/tx/0x$1/one-click-debugger">View in Tenderly!</a>')   // by default we'll add the view in tenderly button to every candidate
+                // store the node in an array for quicker access later so we don't need to check every "text" node
+                nodeList.push(text[i]);
+                // add the hash itself to the list to skip later API calls on repeat hashes
+                textList.push(text[i].innerHTML);
+                // by default we'll add the view in tenderly button to every candidate
+                text[i].innerHTML = text[i].innerHTML.replace(regex, '0x$1 <a href="https://dashboard.tenderly.co/tx/0x$1/one-click-debugger" target="_blank">View in Tenderly <img src="https://storage.googleapis.com/tenderly-public-assets/Tenderly-logo-symbol.png" width="20px"/></a>')   
                 
             }
         } // end for loop
